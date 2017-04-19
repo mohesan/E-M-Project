@@ -32,3 +32,9 @@ class EMsim:
 
     def collisions(self):
         return 0
+
+    def update(self):
+        return 0
+
+    def display(self):
+        return 0
