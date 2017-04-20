@@ -80,7 +80,10 @@ class EMsim:
         return np.array((a_x,a_y,a_z))
 
     def max_v(self):
-        return 0
+
+        max_v = np.amax(abs(self.phase_space[:,3:5]))
+        
+        return max_v
 
     def collisions(self):
         return 0
