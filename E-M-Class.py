@@ -62,6 +62,7 @@ class EMsim:
         self.accuracy = accuracy
         self.positions = [copy(phase_space[:,0:3])]
 
+    @staticmethod
     def coulomb_interactions(position, charge, mass):
         """Calculate coulomb acceleration contribution
 
@@ -97,6 +98,7 @@ class EMsim:
             coul_accel[i,:] = a
         return coul_accel
 
+    @staticmethod
     def evolve(t, p, m, c, b, e):
         # charge - mass ratio
         alpha = c / m
@@ -121,9 +123,9 @@ class EMsim:
         # acceleration due to B-field
         cross_comp = np.cross(vel, b_comp)
         # acceleration from field interactions
-        field_comp = alpha[:,None] * (E_comp + cross_comp)
+        field_comp = alpha[:,None] * (e_comp + cross_comp)
         # coulomb interaction components
-        coul_comp = coulomb_interactions(pos, charge, mass)
+        coul_comp = self.coulomb_interactions(pos, charge, mass)
         return np.hstack((vels, field_comp + coul_comp))
 
     def t_step(self):
