@@ -1,35 +1,46 @@
 import numpy as np
 
 class EMsim:
-    """ This Class is used to simulate the motion of particles with charges under
-    the influence of an electric field
+    """ Electromagnetic Particle Interactions
+
+    This class is used to simulate charged particle dynamics under the influence
+    of electromagnetic fields and coulomb forces from neighbouring particles.
+
     Attributes:
-            phase-space
-            t_start
-            t_end
-            t_step_base
-            t
-            boundary
+        phase_space: particle position and velocity array (# particles, 6)
+        t_start: starting time for simulation
+        t_end: ending time for simulation
+        t_step_base: desired time resolution
+        t: current time
+        boundary: rectangular boundary conditions
 
     Methods:
-            a_e_field
-            a_e_particle
-            t_step
-            collisions
-            update
-            display
+        coulomb_interactions
+        t_step
+        collisions
+        update
+        display
 
     """
 
-    def __init__(self, phase_space, mass, charge, t_data = (0, 1, 0.1), boundary=False, B_field=False, E_field=False, accuracy=0.5):
+    def __init__(
+            self, phase_space, mass, charge, t_data = (0, 1, 0.1),
+            boundary=False, b_field=False, e_field=False, accuracy=0.5
+            ):
         """Sets up the simulation
 
         Args:
-            phase_space - a numpy matrix, where each row corresponds to the phase space
-                          of each particle. e.g. [p1 p2 p3 ...] 
-                          where p1 = [x1 y1 z1 vx1 vy1 vz1 q1 m1]
-                          where ther 1st three are positions, followed by 3 velocities 
-                          followed by the charge and mass of the particle
+            phase_space - numpy ndarray, each row corresponds to the
+                          phase space of each particle. e.g. [p1 p2 p3 ...]
+                          where p1 = [x1 y1 z1 vx1 vy1 vz1]
+            mass - ndarray, (# particles, ), particle masses
+            charge - ndarray, (# particles, ), particle charges
+            t_data - tuple, time data (start, end, time step)
+            boundary - False if no boundary, otherwise tuple of 2-tuples
+                       giving coordinate boundaries eg. ((0,1), (0,1), (0,1))
+            b_field - function or ndarray with shape (3,), magnetic field
+            e_field - function or ndarray with shape (3,), electric field
+            accuracy - degree of time step adaptivity with regards to speed
 
 
         """
@@ -40,10 +51,45 @@ class EMsim:
         self.boundary = boundary
         self.mass = mass
         self.charge = charge
-        self.b_field = B_field
-        self.e_field = E_field
+        self.b_field = b_field
+        self.e_field = b_field
         assert (accuracy <= 1) and (accuracy >= 0), 'Accuracy must be between [0,1]'
         self.accuracy = accuracy
+
+    def coulomb_interactions(position, charge, mass):
+        """Calculate coulomb acceleration contribution
+
+        Take position, charge and mass information of a group of particles,
+        and for each calculate the acceleration components due to the coulomb
+        force from all other particles, returned as a ndarray.
+        """
+        # coulomb constant
+        K_e = 8.99e9 # N m^2 C^-2
+        # possible row indices
+        row_idx = np.arange(position.shape[0])
+        # prep the array to hold velocity derivs
+        coul_accel = np.zeros_like(position)
+        # iterate over particles, maybe this could be better
+        for i, row in enumerate(position):
+            c = charge[i] # charge of the particle under consideration
+            c_other = charge[row_idx != i] # all other particle charges
+
+            m = mass[i] # mass of particle under consideration
+            m_other = mass[row_idx != i] # all other particle masses
+            # position differences between particle and all others
+            #2D array (# particles - 1, 3)
+            p_diff = position[row_idx != i] - row
+
+            d_cube = np.sum(p_diff**2, axis=1)**(3/2)
+
+            c_div_m = c / (K_e*m) # float
+
+            c_div_dc = c_other / d_cube # 1D array(# particles -1,)
+
+            a = c_div_m * np.sum(c_div_dc[:,None] * p_diff, axis=0)
+
+            coul_accel[i,:] = a
+        return coul_accel
 
     def evolve(t, p, m, c, B, E):
         # charge - mass ratio
