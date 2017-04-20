@@ -105,7 +105,10 @@ class EMsim:
         return t_step
 
     def collisions(self):
-        return 0
+        if self.boundary:
+            # check which particles are past the boundary and flip the corresponding velocity and move the particle back in the box
+
+        # check for particle particle collisions
 
     def update(self):
         ts_tracker = 0
