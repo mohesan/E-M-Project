@@ -21,7 +21,7 @@ class EMsim:
 
     """
 
-    def __init__(self, phase_space, mass, charge, t_data = (0, 1, 0.1), boundary=False, B_field=False, E_field=False):
+    def __init__(self, phase_space, mass, charge, t_data = (0, 1, 0.1), boundary=False, B_field=False, E_field=False, accuracy=0.5):
         """Sets up the simulation
 
         Args:
@@ -42,6 +42,8 @@ class EMsim:
         self.charge = charge
         self.b_field = B_field
         self.e_field = E_field
+        assert (accuracy <= 1) and (accuracy >= 0), 'Accuracy must be between [0,1]'
+        self.accuracy = accuracy
 
     def evolve(t, p, m, c, B, E):
         # charge - mass ratio
@@ -75,9 +77,9 @@ class EMsim:
         # indicies of other particles
         iop = np.arange(len(self.phase_space))
         # difference in positions of all particles with respect to the one being analyzed
-        x_dif = self.phase_space[iop != p_index,0] - self.phase[p_index,0]
-        y_dif = self.phase_space[iop != p_index,1] - self.phase[p_index,1]
-        z_dif = self.phase_space[iop != p_index,2] - self.phase[p_index,2] 
+        x_dif = self.phase_space[iop != p_index,0] - self.phase_space[p_index,0]
+        y_dif = self.phase_space[iop != p_index,1] - self.phase_space[p_index,1]
+        z_dif = self.phase_space[iop != p_index,2] - self.phase_space[p_index,2] 
 
         # an array of the cube of the absolute distance between the particles
         d_cube = (x_dif**2 + y_dif**2 + z_dif**2)**(3/2)
@@ -96,7 +98,7 @@ class EMsim:
     def t_step(self):
 
         max_v = np.amax(abs(self.phase_space[:,3:5]))
-        t_step = self.t_step_base*(np.exp(-max_v))
+        t_step = self.t_step_base*(self.accuracy*np.exp(-max_v) + (1-self.accuracy))
 
         return t_step
 
