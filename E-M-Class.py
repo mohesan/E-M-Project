@@ -125,8 +125,8 @@ class EMsim:
         # acceleration from field interactions
         field_comp = alpha[:,None] * (e_comp + cross_comp)
         # coulomb interaction components
-        coul_comp = self.coulomb_interactions(pos, charge, mass)
-        return np.hstack((vels, field_comp + coul_comp))
+        coul_comp = EMsim.coulomb_interactions(pos, c, m)
+        return np.hstack((vel, field_comp + coul_comp))
 
     def t_step(self):
 
