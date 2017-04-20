@@ -142,10 +142,11 @@ class EMsim:
     def update(self):
         ts_tracker = 0
 
-        while ((self.t_end-self.t) < (10**-16)):
+        while ((self.t_end-self.t) > (10**-16)):
             old_position_space = copy(self.phase_space[:,0:3])
             old_t = self.t
-            self.t += t_step()
+            t_step = t_step()
+            self.t += t_step
             change = self.evolve(self.t, self.phase_space, self.mass, self.charge, self.b_field, self.e_field)
             self.phase_space += t_step*change
             self.collisions()
