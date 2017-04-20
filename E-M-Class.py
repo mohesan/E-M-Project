@@ -125,30 +125,6 @@ class EMsim:
         coul_comp = coulomb_interactions(pos, charge, mass)
         return np.hstack((vels, field_comp + coul_comp))
 
-    def a_e_particle(self, p_index):
-        # k_e is the Coulomb's constant
-        k_e = 8.99*(10**9)
-        # indicies of other particles
-        iop = np.arange(len(self.phase_space))
-        # difference in positions of all particles with respect to the one being analyzed
-        x_dif = self.phase_space[iop != p_index,0] - self.phase_space[p_index,0]
-        y_dif = self.phase_space[iop != p_index,1] - self.phase_space[p_index,1]
-        z_dif = self.phase_space[iop != p_index,2] - self.phase_space[p_index,2] 
-
-        # an array of the cube of the absolute distance between the particles
-        d_cube = (x_dif**2 + y_dif**2 + z_dif**2)**(3/2)
-        # charge divided by the the distance cubed
-        c_d_dc = self.charge[iop != p_index]/(d_cube)
-
-        # charge/(mass* k_e)
-        c_div_m = self.charge[p_index]/(k_e*self.mass[p_index])
-
-        a_x = c_div_m*np.sum(x_dif*c_d_dc)
-        a_y = c_div_m*np.sum(y_dif*c_d_dc)
-        a_z = c_div_m*np.sum(z_dif*c_d_dc)
-
-        return np.array((a_x,a_y,a_z))
-
     def t_step(self):
 
         max_v = np.amax(abs(self.phase_space[:,3:6]))
