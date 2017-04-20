@@ -57,7 +57,7 @@ class EMsim:
         self.mass = mass
         self.charge = charge
         self.b_field = b_field
-        self.e_field = b_field
+        self.e_field = e_field
         assert (accuracy <= 1) and (accuracy >= 0), 'Accuracy must be between [0,1]'
         self.accuracy = accuracy
         self.positions = [copy(phase_space[:,0:3])]
