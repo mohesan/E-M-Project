@@ -29,7 +29,8 @@ class EMsim:
 
     def __init__(
             self, phase_space, mass, charge, t_data = (0, 1, 0.1),
-            boundary=False, b_field=False, e_field=False, accuracy=0.5
+            b_field=np.array([0,0,0]), e_field=np.array([0,0,0]),
+            accuracy=0.5, boundary=False
             ):
         """Sets up the simulation
 
