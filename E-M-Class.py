@@ -143,7 +143,7 @@ class EMsim:
         # check for particle particle collisions
 
     def update(self):
-        ts_tracker = 0
+        ts_tracker = 1
 
         while ((self.t_end-self.t) > (10**-16)):
             old_position_space = copy(self.phase_space[:,0:3])
