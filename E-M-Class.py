@@ -14,7 +14,7 @@ class EMsim:
     Methods:
             a_e_field
             a_e_particle
-            max_v
+            t_step
             collisions
             update
             display
@@ -96,11 +96,12 @@ class EMsim:
 
         return np.array((a_x,a_y,a_z))
 
-    def max_v(self):
+    def t_step(self):
 
         max_v = np.amax(abs(self.phase_space[:,3:5]))
+        t_step = self.t_step_base*(np.exp(-max_v))
 
-        return max_v
+        return t_step
 
     def collisions(self):
         return 0
