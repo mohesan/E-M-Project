@@ -187,7 +187,6 @@ class EMsim:
         ax.set_ylabel('Parmesan Gryphons')
         ax.set_zlabel('Parmesan Unicorns')
 
-colors = plt.cm.jet(np.linspace(0,1,N_trajectories))
-lines = [ax.plot([],[],[],'-',c=c)[0] for c in colors]
-pts = [ax.plot([],[],[],'o',c=c)[0] for c in colors]
+        colors = plt.cm.jet(np.linspace(0,1,N_trajectories))
+        pts = [ax.plot([],[],[],'o',c=c)[0] for c in colors]
         return 0
