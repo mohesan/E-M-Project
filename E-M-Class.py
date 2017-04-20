@@ -96,31 +96,34 @@ class EMsim:
             coul_accel[i,:] = a
         return coul_accel
 
-    def evolve(t, p, m, c, B, E):
+    def evolve(t, p, m, c, b, e):
         # charge - mass ratio
         alpha = c / m
 
         # split out the coordinates
-        x, y, z = p[:,0], p[:,1], p[:,2]
+        pos = p[:,:3]
+        #x, y, z = p[:,0], p[:,1], p[:,2]
         # split out the velocities
-        vx, vy, vz = p[:,3], p[:,4], p[:,5]
-        vels = np.column_stack((vx,vy,vz))
+        vel = p[:,3:]
+        #vx, vy, vz = p[:,3], p[:,4], p[:,5]
+        #vels = np.column_stack((vx,vy,vz))
         # is E varying
-        if callable(E):
-            E_comp = E(t, p[:,:3])
+        if callable(e):
+            e_comp = e(t, pos)
         else:
-            E_comp = E
+            e_comp = e
         # is B varying 
-        if callable(B):
-            B_comp = B(t, p[:,:3])
+        if callable(b):
+            b_comp = b(t, pos)
         else:
-            B_comp = B
+            b_comp = b
         # acceleration due to B-field
-        cross_comp = np.cross(vels, B_comp)
-        # acceleration from particle interactions
-
+        cross_comp = np.cross(vel, b_comp)
+        # acceleration from field interactions
         field_comp = alpha[:,None] * (E_comp + cross_comp)
-        return np.hstack((vels, field_comp))
+        # coulomb interaction components
+        coul_comp = coulomb_interactions(pos, charge, mass)
+        return np.hstack((vels, field_comp + coul_comp))
 
     def a_e_particle(self, p_index):
         # k_e is the Coulomb's constant
@@ -174,7 +177,7 @@ class EMsim:
                 new_position_space = weight*old_position_space + (1-weight)*self.phase_space[:,0:3]
                 self.positions.append(new_position_space)
                 ts_tracker +=1
-            
+
 
     def display(self):
         fig = plt.figure()
