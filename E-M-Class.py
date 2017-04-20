@@ -136,6 +136,7 @@ class EMsim:
     def collisions(self):
         if self.boundary:
             # check which particles are past the boundary and flip the corresponding velocity and move the particle back in the box
+            pass
 
         # check for particle particle collisions
 
@@ -145,7 +146,7 @@ class EMsim:
         while ((self.t_end-self.t) > (10**-16)):
             old_position_space = copy(self.phase_space[:,0:3])
             old_t = self.t
-            t_step = t_step()
+            t_step = self.t_step()
             self.t += t_step
             change = self.evolve(self.t, self.phase_space, self.mass, self.charge, self.b_field, self.e_field)
             self.phase_space += t_step*change
