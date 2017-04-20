@@ -135,12 +135,25 @@ class EMsim:
 
         return t_step
 
-    def collisions(self):
+    def collisions(self, t_step):
         if self.boundary:
             # check which particles are past the boundary and flip the corresponding velocity and move the particle back in the box
             pass
 
         # check for particle particle collisions
+        for i, irow in enumerate(self.phase_space):
+            row_idx = np.arange(self.phase_space.shape[0])
+            for j, jrow in enumerate(self.phase_space[row_idx != i,:]):
+                dif = irow - jrow
+                same_position = (dif[0] <= 10**-16) and (dif[1] <= 10**-16) and (dif[2] <= 10**-16)
+                crossed = (((dif[0] - diff[3]*t_step) <= 0) and
+                            ((dif[1] - diff[4]*t_step) <= 0) and
+                            ((dif[2] - diff[5]*t_step) <= 0))
+                if same_position or crossed:
+                    # Do particle collision correection
+
+
+
 
     def update(self):
         ts_tracker = 1
@@ -152,7 +165,7 @@ class EMsim:
             self.t += t_step
             change = self.evolve(self.t, self.phase_space, self.mass, self.charge, self.b_field, self.e_field)
             self.phase_space += t_step*change
-            self.collisions()
+            self.collisions(t_step)
             if (self.t >= (ts_tracker*self.t_step_base)):
                 weight = (ts_tracker*self.t_step_base - self.t)/(old_t-self.t)
                 new_position_space = weight*old_position_space + (1-weight)*self.phase_space[:,0:3]
