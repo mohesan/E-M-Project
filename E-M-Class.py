@@ -42,6 +42,23 @@ class EMsim:
         self.charge = charge
         self.fields = fields
 
+    def evolve(t, p, m, c, B, E):
+        x, y, z = p[:,0], p[:,1], p[:,2]
+        vx, vy, vz = p[:,3], p[:,4], p[:,5]
+        alpha = c / m
+        vels = np.column_stack((vx,vy,vz))
+        if callable(E):
+            E_comp = E(p[:,:3])
+        else:
+            E_comp = E
+        if callable(B):
+            B_comp = B(p[:,:3])
+        else:
+            B_comp = B
+        cross_comp = np.cross(vels, B_comp)
+        field_comp = alpha[:,None] * (E_comp + cross_comp)
+        return np.hstack((vels, field_comp))
+
     def a_e_field(self, particle):
         pos = particle[:3]
         vel = particle[3:6]
