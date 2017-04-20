@@ -99,7 +99,7 @@ class EMsim:
     def max_v(self):
 
         max_v = np.amax(abs(self.phase_space[:,3:5]))
-        
+
         return max_v
 
     def collisions(self):
