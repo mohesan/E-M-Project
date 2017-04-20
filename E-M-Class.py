@@ -21,7 +21,7 @@ class EMsim:
 
     """
 
-    def __init__(self, phase_space, mass, charge, t_data = (0, 1, 0.1), boundary=False, fields = False):
+    def __init__(self, phase_space, mass, charge, t_data = (0, 1, 0.1), boundary=False, B_field=False, E_field=False):
         """Sets up the simulation
 
         Args:
@@ -40,7 +40,8 @@ class EMsim:
         self.boundary = boundary
         self.mass = mass
         self.charge = charge
-        self.fields = fields
+        self.b_field = B_field
+        self.e_field = E_field
 
     def evolve(t, p, m, c, B, E):
         x, y, z = p[:,0], p[:,1], p[:,2]
@@ -107,7 +108,15 @@ class EMsim:
         return 0
 
     def update(self):
-        return 0
+
+        while ((self.t_end-self.t) < (10**-16)):
+
+            t_step = t_step()
+            self.t += t_step
+            change = self.evolve(self.t, self.phase_space, self.mass, self.charge, self.b_field, self.e_field)
+            self.phase_space += t_step*change
+            self.collisions()
+            self.display()
 
     def display(self):
         return 0
