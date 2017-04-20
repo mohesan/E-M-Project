@@ -1,4 +1,5 @@
 import numpy as np
+from copy import copy
 
 class EMsim:
     """ This Class is used to simulate the motion of particles with charges under
@@ -44,6 +45,7 @@ class EMsim:
         self.e_field = E_field
         assert (accuracy <= 1) and (accuracy >= 0), 'Accuracy must be between [0,1]'
         self.accuracy = accuracy
+        self.positions = [copy(phase_space[:,0:3])]
 
     def evolve(t, p, m, c, B, E):
         # charge - mass ratio
@@ -97,7 +99,7 @@ class EMsim:
 
     def t_step(self):
 
-        max_v = np.amax(abs(self.phase_space[:,3:5]))
+        max_v = np.amax(abs(self.phase_space[:,3:6]))
         t_step = self.t_step_base*(self.accuracy*np.exp(-max_v) + (1-self.accuracy))
 
         return t_step
@@ -106,15 +108,21 @@ class EMsim:
         return 0
 
     def update(self):
+        ts_tracker = 0
 
         while ((self.t_end-self.t) < (10**-16)):
-
-            t_step = t_step()
-            self.t += t_step
+            old_position_space = copy(self.phase_space[:,0:3])
+            old_t = self.t
+            self.t += t_step()
             change = self.evolve(self.t, self.phase_space, self.mass, self.charge, self.b_field, self.e_field)
             self.phase_space += t_step*change
             self.collisions()
-            self.display()
+            if (self.t >= (ts_tracker*self.t_step_base)):
+                weight = (ts_tracker*self.t_step_base - self.t)/(old_t-self.t)
+                new_position_space = weight*old_position_space + (1-weight)*self.phase_space[:,0:3]
+                self.positions.append(new_position_space)
+                ts_tracker +=1
+            
 
     def display(self):
         return 0
