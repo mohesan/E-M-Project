@@ -1,5 +1,8 @@
 import numpy as np
 from copy import copy
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from mpl_toolkits.mplot3d import Axes3D
 
 class EMsim:
     """ This Class is used to simulate the motion of particles with charges under
@@ -128,4 +131,17 @@ class EMsim:
             
 
     def display(self):
+        fig = plt.figure()
+        ax = fig.add_axes([0,0,1,1], projection='3d')
+        ax.view_init(30,0)
+        ax.set_xlim((0,100))
+        ax.set_ylim((0,100))
+        ax.set_zlim(0, 10)
+        ax.set_xlabel('Cheddar Gryphons')
+        ax.set_ylabel('Parmesan Gryphons')
+        ax.set_zlabel('Parmesan Unicorns')
+
+colors = plt.cm.jet(np.linspace(0,1,N_trajectories))
+lines = [ax.plot([],[],[],'-',c=c)[0] for c in colors]
+pts = [ax.plot([],[],[],'o',c=c)[0] for c in colors]
         return 0
