@@ -43,34 +43,30 @@ class EMsim:
         self.fields = fields
 
     def evolve(t, p, m, c, B, E):
-        x, y, z = p[:,0], p[:,1], p[:,2]
-        vx, vy, vz = p[:,3], p[:,4], p[:,5]
+        # charge - mass ratio
         alpha = c / m
+
+        # split out the coordinates
+        x, y, z = p[:,0], p[:,1], p[:,2]
+        # split out the velocities
+        vx, vy, vz = p[:,3], p[:,4], p[:,5]
         vels = np.column_stack((vx,vy,vz))
+        # is E varying
         if callable(E):
-            E_comp = E(p[:,:3])
+            E_comp = E(t, p[:,:3])
         else:
             E_comp = E
+        # is B varying 
         if callable(B):
-            B_comp = B(p[:,:3])
+            B_comp = B(t, p[:,:3])
         else:
             B_comp = B
+        # acceleration due to B-field
         cross_comp = np.cross(vels, B_comp)
+        # acceleration from particle interactions
+
         field_comp = alpha[:,None] * (E_comp + cross_comp)
         return np.hstack((vels, field_comp))
-
-    def a_e_field(self, particle):
-        pos = particle[:3]
-        vel = particle[3:6]
-        charge = particle[6]
-        mass = particle[7]
-        # check if the fields are varying
-        if callable(self.fields):
-            # calculate the fields( time dependent) and store only the e-field
-            # wasteful in m-field calculation is long
-            e_field = self.fields(self.t, pos)[0,:]
-
-        return 0
 
     def a_e_particle(self, p_index):
         # k_e is the Coulomb's constant
