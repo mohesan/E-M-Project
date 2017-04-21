@@ -201,53 +201,75 @@ class EMsim:
         return t_step
 
     def collisions(self, t_step):
-        if self.boundary:
+        """Checks to see if any of the particles has collided with the boundary or with another particle. 
+           If collision has occured than an approximate correction will occur. Assumed that all 
+           collisions are elastic in nature"""
 
-            # check which particles are past the boundary and flip the
-            # corresponding velocity and move the particle back in the box
+        # Only need to check for boundary collisions if a boundary is defined   
+        if self.boundary:
+            # Check which particles are past the boundary and flip the
+            # Corresponding velocity and move the particle back in the box
             for i, irow in enumerate(self.phase_space):
-                # x component
+                # x component of the particle is past the lower boundary
                 if irow[0] < self.boundary[0][0]:
+                    # Move the particle back in the box
                     self.phase_space[i,0] = 2*self.boundary[0][0] - self.phase_space[i,0]
+                    # Reflect the corresponding velocity
                     self.phase_space[i,3] *= -1
+                # x component of the particle is past the upper boundary
                 elif irow[0] > self.boundary[0][1]:
                     self.phase_space[i,0] = 2*self.boundary[0][1] - self.phase_space[i,0]
                     self.phase_space[i,3] *= -1
-                #y component
+                # y component of the particle is past the lower boundary
                 if irow[1] < self.boundary[1][0]:
                     self.phase_space[i,1] = 2*self.boundary[1][0] - self.phase_space[i,1]
                     self.phase_space[i,4] *= -1
+                # y component of the particle is past the upper boundary
                 elif irow[1] > self.boundary[1][1]:
                     self.phase_space[i,1] = 2*self.boundary[1][1] - self.phase_space[i,1]
                     self.phase_space[i,4] *= -1
-                # z component
+                # z component of the particle is past the lower boundary
                 if irow[2] < self.boundary[2][0]:
                     self.phase_space[i,2] = 2*self.boundary[2][0] - self.phase_space[i,2]
                     self.phase_space[i,5] *= -1
+                # z component of the particle is past the upper boundary
                 elif irow[2] > self.boundary[2][1]:
                     self.phase_space[i,2] = 2*self.boundary[2][1] - self.phase_space[i,2]
                     self.phase_space[i,5] *= -1
-
 
         # check for particle particle collisions
         for i, irow in enumerate(self.phase_space):
             row_idx = np.arange(self.phase_space.shape[0])
             for j, jrow in enumerate(self.phase_space[row_idx != i,:]):
+                # The difference in phase space
                 dif = irow - jrow
-
+                
+                # two particles cross paths if the (x1-x2)*(x1' - x2') <= 0 for each component (x,y,z)
+                # In some cases this algorithm will have false-positives but that is the inaccuracy associated
+                # with the size of the time_step. smalled timesteps = more accuracy
                 crossed = (((dif[0]*(dif[0] - dif[3]*t_step)) <= 0) and
                             ((dif[1]*(dif[1] - dif[4]*t_step)) <= 0) and
                             ((dif[2]*(dif[2] - dif[5]*t_step)) <= 0))
                 if crossed:
+                    # deep copy of both particles phase space coordinates
                     p1 = copy(irow)
                     p2 = copy(jrow)
+                    # total mass
                     t_mass = self.mass[i] + self.mass[j]
+                    #difference in their masses
                     d_mass = self.mass[i] - self.mass[j]
+                    # Correction in velocities throuh conservation of momentum and kinetic energy
                     self.phase_space[i,3:] = (p1[3:] *(d_mass) + 2*self.mass[j]*p2[3:])/t_mass
                     self.phase_space[j,3:] = (p2[3:] *(-d_mass) + 2*self.mass[i]*p1[3:])/t_mass
+                    # Correction in position is esitmated by calculating the displacement,d, as
+                    # d = v_old*(2/5)*timestep + v_new*(3/5)*timestep 
+                    # The new velocities are preffered to stop particles from passing through each other
+                    # in some cases it is still possible for this 'tunnerling' to occur
                     self.phase_space[i,:3] += (self.phase_space[i,3:]-p1[3:])*(3*t_step/5) 
                     self.phase_space[j,:3] += (self.phase_space[j,3:]-p2[3:])*(3*t_step/5)
 
+                # If the particle's path didnt cross with another particle then check to see that the particle's path 
+                # is not currently at the same position as another particle
                 elif (dif[0] <= 10**-16) and (dif[1] <= 10**-16) and (dif[2] <= 10**-16):
                     p1 = copy(irow)
                     p2 = copy(jrow)
