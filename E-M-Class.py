@@ -137,7 +137,8 @@ class EMsim:
 
     def collisions(self):
         if self.boundary:
-            # check which particles are past the boundary and flip the corresponding velocity and move the particle back in the box
+            # check which particles are past the boundary and flip the
+            #corresponding velocity and move the particle back in the box
             pass
 
         # check for particle particle collisions
@@ -145,19 +146,38 @@ class EMsim:
     def update(self):
         ts_tracker = 1
 
-        while ((self.t_end-self.t) > (10**-16)):
-            old_position_space = copy(self.phase_space[:,0:3])
+        while ((self.t_end-self.t) > (1e-16)):
+            old_position_space = copy(self.phase_space[:,:3])
             old_t = self.t
             t_step = self.t_step()
             self.t += t_step
-            change = self.evolve(self.t, self.phase_space, self.mass, self.charge, self.b_field, self.e_field)
+            change = self.evolve(self.t, self.phase_space, self.mass,
+                                 self.charge, self.b_field, self.e_field)
             self.phase_space += t_step*change
             self.collisions()
             if (self.t >= (ts_tracker*self.t_step_base)):
-                weight = (ts_tracker*self.t_step_base - self.t)/(old_t-self.t)
-                new_position_space = weight*old_position_space + (1-weight)*self.phase_space[:,0:3]
+                weight = (ts_tracker*self.t_step_base - self.t)/(-t_step)
+                new_position_space = (weight*old_position_space +
+                                      (1-weight)*self.phase_space[:,:3])
                 self.positions.append(new_position_space)
                 ts_tracker +=1
+
+    @staticmethod
+    def init():
+        for pt in pts:
+            pt.set_data([], [])
+            pt.set_3d_properties([])
+        return pts
+
+    @staticmethod
+    def animate(i, states, pts):
+        for pt, state in zip(pts, states):
+            pt.set_data(state[i,0], state[i,1])
+            pt.set_3d_properties(state[i,2])
+        ax.view_init(30, 0.3*i)
+        fig.canvas.draw()
+        return pts
+
 
 
     def display(self):
@@ -166,11 +186,18 @@ class EMsim:
         ax.view_init(30,0)
         ax.set_xlim((0,100))
         ax.set_ylim((0,100))
-        ax.set_zlim(0, 10)
-        ax.set_xlabel('Cheddar Gryphons')
-        ax.set_ylabel('Parmesan Gryphons')
-        ax.set_zlabel('Parmesan Unicorns')
+        ax.set_zlim(0, 100)
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
 
-        colors = plt.cm.jet(np.linspace(0,1,N_trajectories))
+        poss = np.array(self.positions)
+        states = [poss[:,i] for i in range(self.position[0].shape[0])]
+
+        colors = plt.cm.jet(np.linspace(0,1,self.positions[0].shape[0]))
         pts = [ax.plot([],[],[],'o',c=c)[0] for c in colors]
-        return 0
+        anim = animation.FuncAnimation(
+                fig, EMsim.animate, init_func=EMsim.init, frames=1000,
+                fargs=(states, pts)
+                )
+        return anim
