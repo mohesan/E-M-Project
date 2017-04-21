@@ -137,24 +137,24 @@ class EMsim:
             for i, irow in enumerate(self.phase_space):
                 # x component
                 if irow[0] < self.boundary[0][0]:
-                    self.phase_space[i,0] -= 2*self.boundary[0][0]
+                    self.phase_space[i,0] = 2*self.boundary[0][0] - self.phase_space[i,0]
                     self.phase_space[i,3] *= -1
                 elif irow[0] > self.boundary[0][1]:
-                    self.phase_space[i,0] -= 2*self.boundary[0][1]
+                    self.phase_space[i,0] = 2*self.boundary[0][1] - self.phase_space[i,0]
                     self.phase_space[i,3] *= -1
                 #y component
                 if irow[1] < self.boundary[1][0]:
-                    self.phase_space[i,1] -= 2*self.boundary[1][0]
+                    self.phase_space[i,1] = 2*self.boundary[1][0] - self.phase_space[i,1]
                     self.phase_space[i,4] *= -1
                 elif irow[1] > self.boundary[1][1]:
-                    self.phase_space[i,1] -= 2*self.boundary[1][1]
+                    self.phase_space[i,1] = 2*self.boundary[1][1] - self.phase_space[i,1]
                     self.phase_space[i,4] *= -1
                 # z component
                 if irow[2] < self.boundary[2][0]:
-                    self.phase_space[i,2] -= 2*self.boundary[2][0]
+                    self.phase_space[i,2] = 2*self.boundary[2][0] - self.phase_space[i,2]
                     self.phase_space[i,5] *= -1
                 elif irow[2] > self.boundary[2][1]:
-                    self.phase_space[i,2] -= 2*self.boundary[2][1]
+                    self.phase_space[i,2] = 2*self.boundary[2][1] - self.phase_space[i,2]
                     self.phase_space[i,5] *= -1
 
 
