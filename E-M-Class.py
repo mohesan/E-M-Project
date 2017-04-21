@@ -190,7 +190,7 @@ class EMsim:
             self.t += t_step
             change = self.evolve(self.t, self.phase_space, self.mass,
                                  self.charge, self.b_field, self.e_field)
-            self.phase_space += t_step*change
+            self.phase_space = self.phase_space + t_step*change
             self.collisions(t_step)
             if (self.t >= (ts_tracker*self.t_step_base)):
                 weight = (ts_tracker*self.t_step_base - self.t)/(-t_step)
