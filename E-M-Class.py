@@ -200,6 +200,29 @@ class EMsim:
 
 
 
+    def rk4(self, t_step):
+        k1 = ((self.evolve(self.t, self.phase_space, self.mass,
+                           self.charge, self.b_field, self.e_field))
+                           *t_step)
+
+        xk = self.phase_space + k1*0.5
+        tk = self.t + t_step*0.5
+        k2 = ((self.evolve(tk, xk, self.mass, self.charge,
+                           self.b_field, self.e_field))
+                           *t_step)
+
+        xk = self.phase_space + k2*0.5
+        k3 = ((self.evolve(tk, xk, self.mass, self.charge,
+                           self.b_field, self.e_field))
+                           *t_step)
+
+        xk = self.phase_space + k3
+        tk = self.t + t_step
+        k4 = ((self.evolve(tk, xk, self.mass, self.charge,
+                           self.b_field, self.e_field))
+                           *t_step)
+        
+        self.phase_space = self.phase_space + (k1 +2*(k2+k3) +k4)/6
 
     def update(self):
         ts_tracker = 1
@@ -208,10 +231,8 @@ class EMsim:
             old_position_space = copy(self.phase_space[:,:3])
             old_t = self.t
             t_step = self.t_step()
+            self.rk4(t_step)
             self.t += t_step
-            change = self.evolve(self.t, self.phase_space, self.mass,
-                                 self.charge, self.b_field, self.e_field)
-            self.phase_space = self.phase_space + t_step*change
             self.collisions(t_step)
             if (self.t >= (ts_tracker*self.t_step_base)):
                 weight = (ts_tracker*self.t_step_base - self.t)/(-t_step)
