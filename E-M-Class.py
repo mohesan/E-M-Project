@@ -247,7 +247,7 @@ class EMsim:
 
     def save_animation(self):
         pass
-        
+
     def create_animation(self):
         fig = plt.figure()
         ax = fig.add_axes([0,0,1,1], projection='3d')
