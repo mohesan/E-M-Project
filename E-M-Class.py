@@ -82,10 +82,10 @@ class EMsim:
                 'Please check that the tuple for boundaries have the lower limit first'
         self.boundary = boundary
         assert(type(mass) is np.ndarray) , 'The mass must be of type numpy.ndarray'
-        assert ((mass.shape[0])==phase_space.shape[0]) and (mass.shape[1]==1), 'Please check that the size of the mass array corresponds to the phase space'
+        assert ((mass.shape[0])==phase_space.shape[0]) and (len(mass.shape)==1), 'Please check that the size of the mass array corresponds to the phase space'
         self.mass = mass
         assert(type(charge) is np.ndarray) , 'The charge must be of type numpy.ndarray'
-        assert ((charge.shape[0])==phase_space.shape[0]) and (charge.shape[1]==1), 'Please check that the size of the charge array corresponds to the phase space'
+        assert ((charge.shape[0])==phase_space.shape[0]) and (len(charge.shape)==1), 'Please check that the size of the charge array corresponds to the phase space'
         self.charge = charge
         assert (callable(b_field)) or (b_field.shape == (3,)), 'Please check that the b_field is either a function or an array of size (3,)'
         self.b_field = b_field
