@@ -70,7 +70,16 @@ class EMsim:
 
         Take position, charge and mass information of a group of particles,
         and for each calculate the acceleration components due to the coulomb
-        force from all other particles, returned as a ndarray.
+        force from all other particles.
+
+        Args:
+            position: 2D ndarray, shape (# particles, 3), columns are x,y,z
+            charge: 1D ndarray, shape (# particles,)
+            mass: 1D ndarray, shape (# particles,)
+
+        Return:
+            coul_accel: 2D ndarray, shape (# particles, 3), columns are
+                        acceleration components x,y,z respectivel
         """
         # coulomb constant
         K_e = 8.99e9 # N m^2 C^-2
@@ -94,12 +103,29 @@ class EMsim:
             c_div_m = c*K_e / m # float
             c_div_dc = c_other / d_cube # 1D array (# particles -1,)
             # add an axis by slicing with None allowing broadcasting
-            a = c_div_m * np.sum(c_div_dc[:,None] * p_diff, axis=0)
-            coul_accel[i,:] = a
+            coul_accel[i,:] = c_div_m * np.sum(c_div_dc[:,None] * p_diff, axis=0)
         return coul_accel
 
     @staticmethod
     def evolve(t, p, m, c, b, e):
+        """Phase space evolution
+
+        Propagate the phase space on time step forward.
+
+        Args:
+            t: float, the time value
+            p: 2D ndarray, shape (# particles, 6), columns correspond to
+               x,y,z positions and velocities respectively
+            m: 1D ndarray, shape (# particles,), masses
+            c: 1D ndarray, shape (# particles,), charges
+            b: function or 1D ndarry, magnetic field
+            e: function or 1D ndarray, electric field
+
+        Return:
+            phase_deriv: 2D ndarray, shape (# particles, 6), rate of change of
+                         phase space components
+
+        """
         # charge - mass ratio
         alpha = c / m
         # split out the coordinates
@@ -116,19 +142,26 @@ class EMsim:
             b_comp = b(t, pos)
         else:
             b_comp = b
-        # acceleration due to b-field
+        # magnetic field interaction
+        # 2D ndarray, shape (# particles, 3)
         cross_comp = np.cross(vel, b_comp)
-        # acceleration from field interactions
+        # acceleration due to field interactions
+        # use slicing with None to add extra dimension to alpha
+        # allowing broadcasting
         field_comp = alpha[:,None] * (e_comp + cross_comp)
         # coulomb interaction components
         coul_comp = EMsim.coulomb_interactions(pos, c, m)
-        return np.hstack((vel, field_comp + coul_comp))
+        phase_deriv = np.hstack((vel, field_comp + coul_comp))
+        return phase_deriv
 
     def t_step(self):
         """Adaptive time step based on particle velocity"""
+        # find the max velocity on the group of paricles
         max_v = np.amax(abs(self.phase_space[:,3:6]))
+        # scale the time step depending on the speed
+        # smaller time steps when the particles are moving fast allows
+        # more precise computation
         t_step = self.t_step_base*(self.accuracy*np.exp(-max_v) + (1-self.accuracy))
-
         return t_step
 
     def collisions(self, t_step):
@@ -176,7 +209,6 @@ class EMsim:
                     d_mass = self.mass[i] - self.mass[j]
                     self.phase_space[i,3:] = (p1[3:] *(d_mass) + 2*self.mass[j]*p2[3:])/t_mass
                     self.phase_space[j,3:] = (p2[3:] *(-d_mass) + 2*self.mass[i]*p1[3:])/t_mass
-                    
                     self.phase_space[i,:3] += (self.phase_space[i,3:]-p1[3:])*(3*t_step/5) 
                     self.phase_space[j,:3] += (self.phase_space[j,3:]-p2[3:])*(3*t_step/5)
 
@@ -191,27 +223,42 @@ class EMsim:
 
 
     def rk4(self, t_step):
+        """Runge-Kutta 4th Order Integration
+
+        Use the evolve method and a supplied time step to advance the
+        phase space attribute through time.
+
+        """
+        # first order
         k1 = ((self.evolve(self.t, self.phase_space, self.mass,
                            self.charge, self.b_field, self.e_field))
                            *t_step)
 
+        # half step, first order deriv
         xk = self.phase_space + k1*0.5
         tk = self.t + t_step*0.5
+
+        # second order
         k2 = ((self.evolve(tk, xk, self.mass, self.charge,
                            self.b_field, self.e_field))
                            *t_step)
 
+        # half step, second order deriv
         xk = self.phase_space + k2*0.5
+        # third order
         k3 = ((self.evolve(tk, xk, self.mass, self.charge,
                            self.b_field, self.e_field))
                            *t_step)
 
+        # full step, third order deriv
         xk = self.phase_space + k3
         tk = self.t + t_step
+        # fourth order
         k4 = ((self.evolve(tk, xk, self.mass, self.charge,
                            self.b_field, self.e_field))
                            *t_step)
 
+        # full runge-kutta phase step
         self.phase_space = self.phase_space + (k1 +2*(k2+k3) +k4)/6
 
     def update(self):
@@ -232,19 +279,31 @@ class EMsim:
                 ts_tracker +=1
 
     def save_animation(self, name, fps=False):
+        """Write animation to supplied file path
+
+        This function can be run after using create_animation. If supplied with
+        only the name parameter, it will use the optimal fps to ensure that
+        the animation speed is 1 second simulation time per real time second.
+
+        Args:
+            name: a qualified, writable, file path to store the mp4 animation
+            fps: False if optimal_fps desired, otherwise positive integer
+        """
         if not fps:
             fps = self.optimal_fps
 
         self.animation.save(name, fps=fps)
 
     def create_animation(self):
+        """Animate movement of particles through 3-space"""
+        # reshape positions into appropriate format
+        # each row of state is an entire particle trajectory
+        poss = np.array(self.positions)
+        states = [poss[:,i] for i in range(self.positions[0].shape[0])]
+        # set up figure and axes
         fig = plt.figure()
         ax = fig.add_axes([0,0,1,1], projection='3d')
         ax.view_init(30,0)
-
-        poss = np.array(self.positions)
-        states = [poss[:,i] for i in range(self.positions[0].shape[0])]
-
         if self.boundary:
             ax.set_xlim((self.boundary[0][0],self.boundary[0][1]))
             ax.set_ylim((self.boundary[1][0],self.boundary[1][1]))
@@ -259,16 +318,19 @@ class EMsim:
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.set_zlabel('z')
-
+        # map colours to charge
         cmap = plt.cm.get_cmap('seismic')
         colors = cmap((self.charge / 2*np.amax(self.charge) + 0.5).astype(int)*255)
         pts = [ax.plot([],[],[],'o',c=c)[0] for c in colors]
+
+        # animation initialization function
         def init():
             for pt in pts:
                 pt.set_data([], [])
                 pt.set_3d_properties([])
             return pts
 
+        # animating done here
         def animate(i, states, pts):
             for pt, state in zip(pts, states):
                 pt.set_data(state[i,0], state[i,1])
@@ -276,10 +338,13 @@ class EMsim:
             ax.view_init(30, 0.3*i)
             fig.canvas.draw()
             return pts
+
+        # ensure frames cover full trajectory
         num_frames = states[0].shape[0]
         anim = animation.FuncAnimation(
                 fig, animate, init_func=init, frames=num_frames,
                 fargs=(states, pts)
                 )
         self.animation=anim
+        # fps to use if animation should flow at 1 real time second
         self.optimal_fps = int(1/self.t_step_base)
