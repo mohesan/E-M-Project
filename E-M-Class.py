@@ -77,7 +77,8 @@ class EMsim:
         assert(t_data[2] > 0), 'the base time step must be greater than 0'
         self.t_start, self.t_end, self.t_step_base = t_data
         self.t = self.t_start
-        assert (boundary[0][0] < boundary[0][1]) and (boundary[1][0] < boundary[1][1]) and (boundary[2][0] < boundary[2][1]),\
+        if boundary:
+            assert (boundary[0][0] < boundary[0][1]) and (boundary[1][0] < boundary[1][1]) and (boundary[2][0] < boundary[2][1]),\
                 'Please check that the tuple for boundaries have the lower limit first'
         self.boundary = boundary
         assert(type(mass) is np.ndarray) , 'The mass must be of type numpy.ndarray'
