@@ -138,7 +138,29 @@ class EMsim:
     def collisions(self, t_step):
         if self.boundary:
             # check which particles are past the boundary and flip the corresponding velocity and move the particle back in the box
-            pass
+            for i, irow in enumerate(self.phase_space):
+                # x component
+                if irow[0] < self.boundary[0][0]:
+                    self.phase_space[i,0] -= 2*self.boundary[0][0]
+                    self.phase_space[i,3] *= -1
+                else if irow[0] > self.boundary[0][1]:
+                    self.phase_space[i,0] -= 2*self.boundary[0][1]
+                    self.phase_space[i,3] *= -1
+                #y component
+                if irow[1] < self.boundary[1][0]:
+                    self.phase_space[i,1] -= 2*self.boundary[1][0]
+                    self.phase_space[i,4] *= -1
+                else if irow[1] > self.boundary[1][1]:
+                    self.phase_space[i,1] -= 2*self.boundary[1][1]
+                    self.phase_space[i,4] *= -1
+                # z component
+                if irow[2] < self.boundary[2][0]:
+                    self.phase_space[i,2] -= 2*self.boundary[2][0]
+                    self.phase_space[i,5] *= -1
+                else if irow[2] > self.boundary[2][1]:
+                    self.phase_space[i,2] -= 2*self.boundary[2][1]
+                    self.phase_space[i,5] *= -1
+
 
         # check for particle particle collisions
         for i, irow in enumerate(self.phase_space):
@@ -146,9 +168,9 @@ class EMsim:
             for j, jrow in enumerate(self.phase_space[row_idx != i,:]):
                 dif = irow - jrow
                 same_position = (dif[0] <= 10**-16) and (dif[1] <= 10**-16) and (dif[2] <= 10**-16)
-                crossed = (((dif[0] - diff[3]*t_step) <= 0) and
-                            ((dif[1] - diff[4]*t_step) <= 0) and
-                            ((dif[2] - diff[5]*t_step) <= 0))
+                crossed = (((dif[0] - dif[3]*t_step) <= 0) and
+                            ((dif[1] - dif[4]*t_step) <= 0) and
+                            ((dif[2] - dif[5]*t_step) <= 0))
                 if same_position or crossed:
                     # Do particle collision correection
 
