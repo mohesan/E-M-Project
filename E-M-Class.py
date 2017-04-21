@@ -169,13 +169,40 @@ class EMsim:
             row_idx = np.arange(self.phase_space.shape[0])
             for j, jrow in enumerate(self.phase_space[row_idx != i,:]):
                 dif = irow - jrow
-                same_position = (dif[0] <= 10**-16) and (dif[1] <= 10**-16) and (dif[2] <= 10**-16)
+                
                 crossed = (((dif[0] - dif[3]*t_step) <= 0) and
                             ((dif[1] - dif[4]*t_step) <= 0) and
                             ((dif[2] - dif[5]*t_step) <= 0))
-                if same_position or crossed:
-                    # Do particle collision correection
-                    pass
+                if crossed:
+                    p1 = copy(irow)
+                    p2 = copy(jrow)
+                    t_mass = self.mass[i] + self.mass[j]
+                    d_mass = self.mass[i] - self.mass[j]
+                    self.phase_space[i,3] = (p1[3] *(d_mass) + 2*self.mass[j]*p2[3])/t_mass
+                    self.phase_space[j,3] = (p2[3] *(-d_mass) + 2*self.mass[i]*p1[3])/t_mass
+                    self.phase_space[i,4] = (p1[4] *(d_mass) + 2*self.mass[j]*p2[4])/t_mass
+                    self.phase_space[j,4] = (p2[4] *(-d_mass) + 2*self.mass[i]*p1[4])/t_mass
+                    self.phase_space[i,5] = (p1[5] *(d_mass) + 2*self.mass[j]*p2[5])/t_mass
+                    self.phase_space[j,5] = (p2[5] *(-d_mass) + 2*self.mass[i]*p1[5])/t_mass
+
+                    self.phase_space[i,0] += (self.phase_space[i,3]-p1[3])*(t_step/2) 
+                    self.phase_space[j,0] += (self.phase_space[j,3]-p2[3])*(t_step/2) 
+                    self.phase_space[i,1] += (self.phase_space[i,4]-p1[4])*(t_step/2) 
+                    self.phase_space[j,1] += (self.phase_space[j,4]-p2[4])*(t_step/2) 
+                    self.phase_space[i,2] += (self.phase_space[i,5]-p1[5])*(t_step/2) 
+                    self.phase_space[j,2] += (self.phase_space[j,5]-p2[5])*(t_step/2) 
+
+                elif (dif[0] <= 10**-16) and (dif[1] <= 10**-16) and (dif[2] <= 10**-16):
+                    p1 = copy(irow)
+                    p2 = copy(jrow)
+                    t_mass = self.mass[i] + self.mass[j]
+                    d_mass = self.mass[i] - self.mass[j]
+                    self.phase_space[i,3] = (p1[3] *(d_mass) + 2*self.mass[j]*p2[3])/t_mass
+                    self.phase_space[j,3] = (p2[3] *(-d_mass) + 2*self.mass[i]*p1[3])/t_mass
+                    self.phase_space[i,4] = (p1[4] *(d_mass) + 2*self.mass[j]*p2[4])/t_mass
+                    self.phase_space[j,4] = (p2[4] *(-d_mass) + 2*self.mass[i]*p1[4])/t_mass
+                    self.phase_space[i,5] = (p1[5] *(d_mass) + 2*self.mass[j]*p2[5])/t_mass
+                    self.phase_space[j,5] = (p2[5] *(-d_mass) + 2*self.mass[i]*p1[5])/t_mass
 
 
 
