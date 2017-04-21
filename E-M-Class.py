@@ -282,8 +282,10 @@ class EMsim:
         self.phase_space = self.phase_space + (k1 +2*(k2+k3) +k4)/6
 
     def update(self):
+        """Move the particles through the entire time range"""
+        # how many time steps have we done
         ts_tracker = 1
-
+        # while we're not at the end
         while ((self.t_end-self.t) > (1e-16)):
             old_position_space = copy(self.phase_space[:,:3])
             old_t = self.t
@@ -291,7 +293,10 @@ class EMsim:
             self.rk4(t_step)
             self.t += t_step
             self.collisions(t_step)
+            # filter out when we are at integer multiples of the base time step
             if (self.t >= (ts_tracker*self.t_step_base)):
+                # weighted smoothing to calculate the phase space
+                # between time steps
                 weight = (ts_tracker*self.t_step_base - self.t)/(-t_step)
                 new_position_space = (weight*old_position_space +
                                       (1-weight)*self.phase_space[:,:3])
