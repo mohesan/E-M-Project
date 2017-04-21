@@ -74,7 +74,7 @@ class EMsim:
         self.phase_space = phase_space
         assert (t_data[1] > t_data[0]), 'end time provided must be greater than start time'
         assert((t_data[1]-t_data[0]) > t_data[2]), 'the base time step must be smaller then the time interval'
-        assert(t_step_base > 0), 'the base time step must be greater than 0'
+        assert(t_data[2] > 0), 'the base time step must be greater than 0'
         self.t_start, self.t_end, self.t_step_base = t_data
         self.t = self.t_start
         assert (boundary[0][0] < boundary[0][1]) and (boundary[1][0] < boundary[1][1]) and (boundary[2][0] < boundary[2][1]),\
