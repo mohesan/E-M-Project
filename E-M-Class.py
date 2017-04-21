@@ -31,11 +31,19 @@ class EMsim:
                      one second in real time (int)
 
     Methods:
-        coulomb_interactions
-        t_step
-        collisions
-        update
-        display
+        coulomb_interactions: Calculates the acceleration caused by all particles on all other particles
+                              (Returns array (#particles, 3))
+        evolve:               Calculates the new differentials i.e. new velocities and new accelerations
+                              (Returns array (#particles, 6))
+        t_step:               Calculates the time_step according to the maximum speed of the particles
+                              and the accuracy attribute (Returns float)
+        collisions:           Corrects the phase_space attribute in case of collisions between a particle
+                              and the boundary or between particles (Returns pass)
+        rk4:                  Use forth order Runge-Kutta method to determine the evolution of the 
+                              phase-space (Returns pass)
+        update:               Runs the simulation until t_end (Returns pass)
+        save_animation:       Saves the animation instance as an mpeg file (Returns pass)
+        create_animation:     Creates the animation passed on the positions attribute (Returns pass)
 
     """
 
