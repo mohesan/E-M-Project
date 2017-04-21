@@ -83,18 +83,16 @@ class EMsim:
 
             m = mass[i] # mass of particle under consideration
             m_other = mass[row_idx != i] # all other particle masses
+
             # position differences between particle and all others
-            #2D array (# particles - 1, 3)
+            # 2D array (# particles - 1, 3)
             p_diff = position[row_idx != i] - row
-
+            # 1D array (# particles - 1,)
             d_cube = np.sum(p_diff**2, axis=1)**(3/2)
-
             c_div_m = c / (K_e*m) # float
-
-            c_div_dc = c_other / d_cube # 1D array(# particles -1,)
-
+            c_div_dc = c_other / d_cube # 1D array (# particles -1,)
+            # add an axis by slicing with None allowing broadcasting
             a = c_div_m * np.sum(c_div_dc[:,None] * p_diff, axis=0)
-
             coul_accel[i,:] = a
         return coul_accel
 
@@ -102,25 +100,21 @@ class EMsim:
     def evolve(t, p, m, c, b, e):
         # charge - mass ratio
         alpha = c / m
-
         # split out the coordinates
         pos = p[:,:3]
-        #x, y, z = p[:,0], p[:,1], p[:,2]
         # split out the velocities
         vel = p[:,3:]
-        #vx, vy, vz = p[:,3], p[:,4], p[:,5]
-        #vels = np.column_stack((vx,vy,vz))
-        # is E varying
+        # is e varying
         if callable(e):
             e_comp = e(t, pos)
         else:
             e_comp = e
-        # is B varying 
+        # is b varying
         if callable(b):
             b_comp = b(t, pos)
         else:
             b_comp = b
-        # acceleration due to B-field
+        # acceleration due to b-field
         cross_comp = np.cross(vel, b_comp)
         # acceleration from field interactions
         field_comp = alpha[:,None] * (e_comp + cross_comp)
@@ -129,7 +123,7 @@ class EMsim:
         return np.hstack((vel, field_comp + coul_comp))
 
     def t_step(self):
-
+        """Adaptive time step based on particle velocity"""
         max_v = np.amax(abs(self.phase_space[:,3:6]))
         t_step = self.t_step_base*(self.accuracy*np.exp(-max_v) + (1-self.accuracy))
 
@@ -169,7 +163,7 @@ class EMsim:
             row_idx = np.arange(self.phase_space.shape[0])
             for j, jrow in enumerate(self.phase_space[row_idx != i,:]):
                 dif = irow - jrow
-                
+
                 crossed = (((dif[0] - dif[3]*t_step) <= 0) and
                             ((dif[1] - dif[4]*t_step) <= 0) and
                             ((dif[2] - dif[5]*t_step) <= 0))
