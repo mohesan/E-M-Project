@@ -12,11 +12,23 @@ class EMsim:
 
     Attributes:
         phase_space: particle position and velocity array (# particles, 6)
-        t_start: starting time for simulation
-        t_end: ending time for simulation
-        t_step_base: desired time resolution
-        t: current time
-        boundary: rectangular boundary conditions
+        t_start:     starting time for simulation (float)
+        t_end:       ending time for simulation (float)
+        t_step_base: desired time resolution (float)
+        t:           current time (float)
+        boundary:    False if no boundary, otherwise tuple of 2-tuples
+                     giving coordinate boundaries eg. ((0,1), (0,1), (0,1))
+        mass:        mass of all particles array of floats, (# particles, 1)
+        charge:      charge of all particles array of floats, (# particles, 1)
+        b_field:     magnetic field, function or array of floats with shape (3,)
+        e_field:     electric field, function or array of floats with shape (3,)
+        accuracy:    degree of time step adaptivity with regards to speed float in bounds of [0,1]
+        positions:   the positions of all the particles at times t=t_step_base*i where i >=0 is an integer
+                     and t_start <= t <= t_end a 3D array of floats (int((t_end-t_start)/t_step_base),# particles,3)
+        animation:   Animation of the particles between t_start and t_end as created by create_animation()
+                     (matplotlib.animation instance)
+        optimal_fps: The optimal frames per second to view the animation so that one second in the animation is 
+                     one second in real time (int)
 
     Methods:
         coulomb_interactions
