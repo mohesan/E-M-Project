@@ -243,8 +243,6 @@ class EMsim:
                 self.positions.append(new_position_space)
                 ts_tracker +=1
 
-
-
     def save_animation(self, name, fps=False):
         if not fps:
             fps = self.optimal_fps
