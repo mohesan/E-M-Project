@@ -58,30 +58,46 @@ class EMsim:
             phase_space - numpy ndarray, each row corresponds to the
                           phase space of each particle. e.g. [p1 p2 p3 ...]
                           where p1 = [x1 y1 z1 vx1 vy1 vz1]
-            mass - ndarray, (# particles, ), particle masses
-            charge - ndarray, (# particles, ), particle charges
-            t_data - tuple, time data (start, end, time step)
-            boundary - False if no boundary, otherwise tuple of 2-tuples
-                       giving coordinate boundaries eg. ((0,1), (0,1), (0,1))
-            b_field - function or ndarray with shape (3,), magnetic field
-            e_field - function or ndarray with shape (3,), electric field
-            accuracy - degree of time step adaptivity with regards to speed
-
-
+            mass -------- ndarray, (# particles, 1), particle masses
+            charge ------ ndarray, (# particles, 1), particle charges
+            t_data ------ tuple, time data (start, end, time step)
+            b_field ----- function or ndarray with shape (3,1), magnetic field
+            e_field ----- function or ndarray with shape (3,1), electric field
+            accuracy ---- float in bounds of [0,1], degree of time step adaptivity 
+                          with regards to speed
+            boundary ---- False if no boundary, otherwise tuple of 2-tuples
+                          giving coordinate boundaries eg. ((0,1), (0,1), (0,1))
         """
-
+        # Validating input as well as initializing the class
+        assert ((type(phase_space) is np.ndarray) and (phase_space.shape[1] ==6), 
+            'The phase space must only contain 3 positions and 3 velocities per particle and must be of type numpy.ndarray')
         self.phase_space = phase_space
+        assert (t_end > t_start), 'end time provided must be greater than start time'
+        assert((t_end-t_start) < t_step_base), 'the base time step must be smaller then the time interval'
+        assert(t_step_base > 0), 'the base time step must be greater than 0'
         self.t_start, self.t_end, self.t_step_base = t_data
         self.t = self.t_start
+        assert ((boundary[0][0] < boundary[0][1]) and (boundary[1][0] < boundary[1][1]) and (boundary[2][0] < boundary[2][1]),
+                'Please check that the tuple for boundaries have the lower limit first')
         self.boundary = boundary
+        assert(type(mass) is np.ndarray) , 'The mass must be of type numpy.ndarray'
+        assert ((mass.shape[0])==phase_space.shape[0]) and (mass.shape[1]==1), 'Please check that the size of the mass array corresponds to the phase space'
         self.mass = mass
+        assert(type(charge) is np.ndarray) , 'The charge must be of type numpy.ndarray'
+        assert ((charge.shape[0])==phase_space.shape[0]) and (charge.shape[1]==1), 'Please check that the size of the charge array corresponds to the phase space'
         self.charge = charge
+        assert (callable(b_field)) or (b_field.shape == (3,)), 'Please check that the b_field is either a function or an array of size (3,)'
         self.b_field = b_field
+        assert (callable(e_field)) or (e_field.shape == (3,)), 'Please check that the e_field is either a function or an array of size (3,)'
         self.e_field = e_field
         assert (accuracy <= 1) and (accuracy >= 0), 'Accuracy must be between [0,1]'
         self.accuracy = accuracy
+        # Copy the phase_space so that they aren't linked
         self.positions = [copy(phase_space[:,0:3])]
+        # Once the method create_animation() is run it will set the animation instance to this attribute
         self.animation = None
+        # The optimal_fps is used when saving the animation instance as an mpeg
+        # The optimal fps is the number of frames per second needed so that the mpeg runs at the same rate as real time
         self.optimal_fps = None
 
     @staticmethod
