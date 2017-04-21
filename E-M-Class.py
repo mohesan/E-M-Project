@@ -61,6 +61,8 @@ class EMsim:
         assert (accuracy <= 1) and (accuracy >= 0), 'Accuracy must be between [0,1]'
         self.accuracy = accuracy
         self.positions = [copy(phase_space[:,0:3])]
+        self.animation = None
+        self.optimal_fps = None
 
     @staticmethod
     def coulomb_interactions(position, charge, mass):
@@ -243,8 +245,10 @@ class EMsim:
 
 
 
-
-    def display(self):
+    def save_animation(self):
+        pass
+        
+    def create_animation(self):
         fig = plt.figure()
         ax = fig.add_axes([0,0,1,1], projection='3d')
         ax.view_init(30,0)
@@ -287,4 +291,4 @@ class EMsim:
                 fig, animate, init_func=init, frames=1000,
                 fargs=(states, pts)
                 )
-        return anim
+        self.animation=anim
