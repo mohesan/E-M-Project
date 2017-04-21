@@ -69,16 +69,16 @@ class EMsim:
                           giving coordinate boundaries eg. ((0,1), (0,1), (0,1))
         """
         # Validating input as well as initializing the class
-        assert ((type(phase_space) is np.ndarray) and (phase_space.shape[1] ==6), 
-            'The phase space must only contain 3 positions and 3 velocities per particle and must be of type numpy.ndarray')
+        assert (type(phase_space) is np.ndarray) and (phase_space.shape[1] ==6), \
+            'The phase space must only contain 3 positions and 3 velocities per particle and must be of type numpy.ndarray'
         self.phase_space = phase_space
-        assert (t_end > t_start), 'end time provided must be greater than start time'
-        assert((t_end-t_start) < t_step_base), 'the base time step must be smaller then the time interval'
+        assert (t_data[1] > t_data[0]), 'end time provided must be greater than start time'
+        assert((t_data[1]-t_data[0]) < t_data[2]), 'the base time step must be smaller then the time interval'
         assert(t_step_base > 0), 'the base time step must be greater than 0'
         self.t_start, self.t_end, self.t_step_base = t_data
         self.t = self.t_start
-        assert ((boundary[0][0] < boundary[0][1]) and (boundary[1][0] < boundary[1][1]) and (boundary[2][0] < boundary[2][1]),
-                'Please check that the tuple for boundaries have the lower limit first')
+        assert (boundary[0][0] < boundary[0][1]) and (boundary[1][0] < boundary[1][1]) and (boundary[2][0] < boundary[2][1]),\
+                'Please check that the tuple for boundaries have the lower limit first'
         self.boundary = boundary
         assert(type(mass) is np.ndarray) , 'The mass must be of type numpy.ndarray'
         assert ((mass.shape[0])==phase_space.shape[0]) and (mass.shape[1]==1), 'Please check that the size of the mass array corresponds to the phase space'
