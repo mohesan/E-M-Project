@@ -227,16 +227,23 @@ class EMsim:
         fig = plt.figure()
         ax = fig.add_axes([0,0,1,1], projection='3d')
         ax.view_init(30,0)
-        ax.set_xlim((0,100))
-        ax.set_ylim((0,100))
-        ax.set_zlim(0, 100)
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
-        ax.set_zlabel('z')
 
         poss = np.array(self.positions)
         states = [poss[:,i] for i in range(self.positions[0].shape[0])]
 
+        if self.boundary:
+            ax.set_xlim((self.boundary[0][0],self.boundary[0][1]))
+            ax.set_ylim((self.boundary[1][0],self.boundary[1][1]))
+            ax.set_zlim((self.boundary[2][0],self.boundary[2][1]))
+        else:
+            limits = np.amax(np.vstack(poss),axis=0)
+            ax.set_xlim((self.boundary[0][0],self.boundary[0][1]))
+            ax.set_ylim((self.boundary[1][0],self.boundary[1][1]))
+            ax.set_zlim((self.boundary[2][0],self.boundary[2][1]))
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        
         colors = plt.cm.jet(np.linspace(0,1,self.positions[0].shape[0]))
         pts = [ax.plot([],[],[],'o',c=c)[0] for c in colors]
         def init():
