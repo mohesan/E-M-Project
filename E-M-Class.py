@@ -88,10 +88,10 @@ class EMsim:
 
             # position differences between particle and all others
             # 2D array (# particles - 1, 3)
-            p_diff = position[row_idx != i] - row
+            p_diff = row - position[row_idx != i]
             # 1D array (# particles - 1,)
             d_cube = np.sum(p_diff**2, axis=1)**(3/2)
-            c_div_m = c / (K_e*m) # float
+            c_div_m = c*K_e / m # float
             c_div_dc = c_other / d_cube # 1D array (# particles -1,)
             # add an axis by slicing with None allowing broadcasting
             a = c_div_m * np.sum(c_div_dc[:,None] * p_diff, axis=0)
