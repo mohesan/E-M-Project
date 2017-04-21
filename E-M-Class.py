@@ -175,6 +175,7 @@ class EMsim:
                             ((dif[2] - dif[5]*t_step) <= 0))
                 if same_position or crossed:
                     # Do particle collision correection
+                    pass
 
 
 
