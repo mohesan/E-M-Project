@@ -199,21 +199,6 @@ class EMsim:
                 self.positions.append(new_position_space)
                 ts_tracker +=1
 
-    @staticmethod
-    def init():
-        for pt in pts:
-            pt.set_data([], [])
-            pt.set_3d_properties([])
-        return pts
-
-    @staticmethod
-    def animate(i, states, pts):
-        for pt, state in zip(pts, states):
-            pt.set_data(state[i,0], state[i,1])
-            pt.set_3d_properties(state[i,2])
-        ax.view_init(30, 0.3*i)
-        fig.canvas.draw()
-        return pts
 
 
 
@@ -233,8 +218,22 @@ class EMsim:
 
         colors = plt.cm.jet(np.linspace(0,1,self.positions[0].shape[0]))
         pts = [ax.plot([],[],[],'o',c=c)[0] for c in colors]
+        def init():
+            for pt in pts:
+                pt.set_data([], [])
+                pt.set_3d_properties([])
+            return pts
+
+        def animate(i, states, pts):
+            for pt, state in zip(pts, states):
+                pt.set_data(state[i,0], state[i,1])
+                pt.set_3d_properties(state[i,2])
+            ax.view_init(30, 0.3*i)
+            fig.canvas.draw()
+            return pts
+
         anim = animation.FuncAnimation(
-                fig, EMsim.animate, init_func=EMsim.init, frames=1000,
+                fig, animate, init_func=init, frames=1000,
                 fargs=(states, pts)
                 )
         return anim
