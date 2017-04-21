@@ -223,7 +223,7 @@ class EMsim:
         k4 = ((self.evolve(tk, xk, self.mass, self.charge,
                            self.b_field, self.e_field))
                            *t_step)
-        
+
         self.phase_space = self.phase_space + (k1 +2*(k2+k3) +k4)/6
 
     def update(self):
@@ -243,10 +243,11 @@ class EMsim:
                 self.positions.append(new_position_space)
                 ts_tracker +=1
 
+    def save_animation(self, name, fps=False):
+        if not fps:
+            fps = self.optimal_fps
 
-
-    def save_animation(self):
-        pass
+        self.animation.save(name, fps=fps)
 
     def create_animation(self):
         fig = plt.figure()
@@ -270,8 +271,9 @@ class EMsim:
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.set_zlabel('z')
-        
-        colors = plt.cm.jet(np.linspace(0,1,self.positions[0].shape[0]))
+
+        cmap = plt.cm.get_cmap('seismic')
+        colors = cmap((self.charge / 2*np.amax(self.charge) + 0.5).astype(int)*255)
         pts = [ax.plot([],[],[],'o',c=c)[0] for c in colors]
         def init():
             for pt in pts:
@@ -286,9 +288,10 @@ class EMsim:
             ax.view_init(30, 0.3*i)
             fig.canvas.draw()
             return pts
-
+        num_frames = states[0].shape[0]
         anim = animation.FuncAnimation(
-                fig, animate, init_func=init, frames=1000,
+                fig, animate, init_func=init, frames=num_frames,
                 fargs=(states, pts)
                 )
         self.animation=anim
+        self.optimal_fps = int(1/self.t_step_base)
