@@ -73,7 +73,7 @@ class EMsim:
             'The phase space must only contain 3 positions and 3 velocities per particle and must be of type numpy.ndarray'
         self.phase_space = phase_space
         assert (t_data[1] > t_data[0]), 'end time provided must be greater than start time'
-        assert((t_data[1]-t_data[0]) < t_data[2]), 'the base time step must be smaller then the time interval'
+        assert((t_data[1]-t_data[0]) > t_data[2]), 'the base time step must be smaller then the time interval'
         assert(t_step_base > 0), 'the base time step must be greater than 0'
         self.t_start, self.t_end, self.t_step_base = t_data
         self.t = self.t_start
