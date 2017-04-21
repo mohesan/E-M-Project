@@ -229,7 +229,7 @@ class EMsim:
         ax.set_zlabel('z')
 
         poss = np.array(self.positions)
-        states = [poss[:,i] for i in range(self.position[0].shape[0])]
+        states = [poss[:,i] for i in range(self.positions[0].shape[0])]
 
         colors = plt.cm.jet(np.linspace(0,1,self.positions[0].shape[0]))
         pts = [ax.plot([],[],[],'o',c=c)[0] for c in colors]
