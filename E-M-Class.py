@@ -260,35 +260,93 @@ class EMsim:
                 for i, irow in enumerate(self.phase_space):
                     # x component of the particle is past the lower boundary
                     if irow[0] < self.boundary[0][0]:
+                        # out of bounds distance
+                        o_b_d = self.boundary[0][0] - irow[0]
+                        # number of extra bounces
+                        n_e_b = o_b_d//(self.boundary[0][1]-self.boundary[0][0])
+
                         # Move the particle back in the box
-                        self.phase_space[i,0] = 2*self.boundary[0][0] - self.phase_space[i,0]
                         # Reflect the corresponding velocity
-                        self.phase_space[i,3] *= -1
+                        if (n_e_b % 2) == 0:
+                            self.phase_space[i,0] = self.boundary[0][0] + (o_b_d - n_e_b*(self.boundary[0][1]-self.boundary[0][0]))
+                            self.phase_space[i,3] *= -1                            
+                        else:
+                            self.phase_space[i,0] = self.boundary[0][1] - (o_b_d - n_e_b*(self.boundary[0][1]-self.boundary[0][0]))
                         n_b_c +=1
                     # x component of the particle is past the upper boundary
                     elif irow[0] > self.boundary[0][1]:
-                        self.phase_space[i,0] = 2*self.boundary[0][1] - self.phase_space[i,0]
-                        self.phase_space[i,3] *= -1
+                        # out of bounds distance
+                        o_b_d = irow[0] - self.boundary[0][1]
+                        # number of extra bounces
+                        n_e_b = o_b_d//(self.boundary[0][1]-self.boundary[0][0])
+
+                        # Move the particle back in the box
+                        # Reflect the corresponding velocity
+                        if (n_e_b % 2) == 0:
+                            self.phase_space[i,0] = self.boundary[0][1] - (o_b_d - n_e_b*(self.boundary[0][1]-self.boundary[0][0]))
+                            self.phase_space[i,3] *= -1                            
+                        else:
+                            self.phase_space[i,0] = self.boundary[0][0] + (o_b_d - n_e_b*(self.boundary[0][1]-self.boundary[0][0]))
                         n_b_c +=1
                     # y component of the particle is past the lower boundary
                     if irow[1] < self.boundary[1][0]:
-                        self.phase_space[i,1] = 2*self.boundary[1][0] - self.phase_space[i,1]
-                        self.phase_space[i,4] *= -1
+                        # out of bounds distance
+                        o_b_d = self.boundary[1][0] -irow[1] 
+                        # number of extra bounces
+                        n_e_b = o_b_d//(self.boundary[1][1]-self.boundary[1][0])
+
+                        # Move the particle back in the box
+                        # Reflect the corresponding velocity
+                        if (n_e_b % 2) == 0:
+                            self.phase_space[i,1] = self.boundary[1][0] + (o_b_d - n_e_b*(self.boundary[1][1]-self.boundary[1][0]))
+                            self.phase_space[i,4] *= -1                            
+                        else:
+                            self.phase_space[i,1] = self.boundary[1][1] - (o_b_d - n_e_b*(self.boundary[1][1]-self.boundary[1][0]))
                         n_b_c +=1
                     # y component of the particle is past the upper boundary
                     elif irow[1] > self.boundary[1][1]:
-                        self.phase_space[i,1] = 2*self.boundary[1][1] - self.phase_space[i,1]
-                        self.phase_space[i,4] *= -1
+                        # out of bounds distance
+                        o_b_d = irow[1] - self.boundary[1][1]
+                        # number of extra bounces
+                        n_e_b = o_b_d//(self.boundary[1][1]-self.boundary[1][0])
+
+                        # Move the particle back in the box
+                        # Reflect the corresponding velocity
+                        if (n_e_b % 2) == 0:
+                            self.phase_space[i,1] = self.boundary[1][1] - (o_b_d - n_e_b*(self.boundary[1][1]-self.boundary[1][0]))
+                            self.phase_space[i,4] *= -1                            
+                        else:
+                            self.phase_space[i,1] = self.boundary[1][0] + (o_b_d - n_e_b*(self.boundary[1][1]-self.boundary[1][0]))
                         n_b_c +=1
                     # z component of the particle is past the lower boundary
                     if irow[2] < self.boundary[2][0]:
-                        self.phase_space[i,2] = 2*self.boundary[2][0] - self.phase_space[i,2]
-                        self.phase_space[i,5] *= -1
+                        # out of bounds distance
+                        o_b_d = self.boundary[2][0] - irow[2]
+                        # number of extra bounces
+                        n_e_b = o_b_d//(self.boundary[2][1]-self.boundary[2][0])
+
+                        # Move the particle back in the box
+                        # Reflect the corresponding velocity
+                        if (n_e_b % 2) == 0:
+                            self.phase_space[i,2] = self.boundary[2][0] + (o_b_d - n_e_b*(self.boundary[2][1]-self.boundary[2][0]))
+                            self.phase_space[i,5] *= -1                            
+                        else:
+                            self.phase_space[i,2] = self.boundary[2][1] - (o_b_d - n_e_b*(self.boundary[2][1]-self.boundary[2][0]))
                         n_b_c +=1
                     # z component of the particle is past the upper boundary
                     elif irow[2] > self.boundary[2][1]:
-                        self.phase_space[i,2] = 2*self.boundary[2][1] - self.phase_space[i,2]
-                        self.phase_space[i,5] *= -1
+                        # out of bounds distance
+                        o_b_d = irow[2] - self.boundary[2][1]
+                        # number of extra bounces
+                        n_e_b = o_b_d//(self.boundary[2][1]-self.boundary[2][0])
+
+                        # Move the particle back in the box
+                        # Reflect the corresponding velocity
+                        if (n_e_b % 2) == 0:
+                            self.phase_space[i,2] = self.boundary[2][1] - (o_b_d - n_e_b*(self.boundary[2][1]-self.boundary[2][0]))
+                            self.phase_space[i,5] *= -1                            
+                        else:
+                            self.phase_space[i,2] = self.boundary[2][0] + (o_b_d - n_e_b*(self.boundary[2][1]-self.boundary[2][0]))
                         n_b_c +=1
 
 
