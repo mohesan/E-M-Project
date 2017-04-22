@@ -244,7 +244,7 @@ class EMsim:
             for j, jrow in enumerate(self.phase_space[row_idx != i,:]):
                 # The difference in phase space
                 dif = irow - jrow
-                
+
                 # two particles cross paths if the (x1-x2)*(x1' - x2') <= 0 for each component (x,y,z)
                 # In some cases this algorithm will have false-positives but that is the inaccuracy associated
                 # with the size of the time_step. smalled timesteps = more accuracy
