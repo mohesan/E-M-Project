@@ -429,7 +429,7 @@ class EMsim:
 
         self.animation.save(name, fps=fps)
 
-    def create_animation(self):
+    def create_animation(self, z_angle):
         """Animate movement of particles through 3-space"""
         # reshape positions into appropriate format
         # each row of state is an entire particle trajectory
@@ -438,7 +438,7 @@ class EMsim:
         # set up figure and axes
         fig = plt.figure()
         ax = fig.add_axes([0,0,1,1], projection='3d')
-        ax.view_init(30,0)
+        ax.view_init(z_angle,0)
         if self.boundary:
             ax.set_xlim((self.boundary[0][0],self.boundary[0][1]))
             ax.set_ylim((self.boundary[1][0],self.boundary[1][1]))
@@ -470,7 +470,7 @@ class EMsim:
             for pt, state in zip(pts, states):
                 pt.set_data(state[i,0], state[i,1])
                 pt.set_3d_properties(state[i,2])
-            ax.view_init(30, 0.3*i)
+            ax.view_init(z_angle, 0.3*i)
             fig.canvas.draw()
             return pts
 
