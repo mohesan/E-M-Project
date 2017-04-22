@@ -206,38 +206,6 @@ class EMsim:
            If collision has occured than an approximate correction will occur. Assumed that all 
            collisions are elastic in nature"""
 
-        # Only need to check for boundary collisions if a boundary is defined   
-        if self.boundary:
-            # Check which particles are past the boundary and flip the
-            # Corresponding velocity and move the particle back in the box
-            for i, irow in enumerate(self.phase_space):
-                # x component of the particle is past the lower boundary
-                if irow[0] < self.boundary[0][0]:
-                    # Move the particle back in the box
-                    self.phase_space[i,0] = 2*self.boundary[0][0] - self.phase_space[i,0]
-                    # Reflect the corresponding velocity
-                    self.phase_space[i,3] *= -1
-                # x component of the particle is past the upper boundary
-                elif irow[0] > self.boundary[0][1]:
-                    self.phase_space[i,0] = 2*self.boundary[0][1] - self.phase_space[i,0]
-                    self.phase_space[i,3] *= -1
-                # y component of the particle is past the lower boundary
-                if irow[1] < self.boundary[1][0]:
-                    self.phase_space[i,1] = 2*self.boundary[1][0] - self.phase_space[i,1]
-                    self.phase_space[i,4] *= -1
-                # y component of the particle is past the upper boundary
-                elif irow[1] > self.boundary[1][1]:
-                    self.phase_space[i,1] = 2*self.boundary[1][1] - self.phase_space[i,1]
-                    self.phase_space[i,4] *= -1
-                # z component of the particle is past the lower boundary
-                if irow[2] < self.boundary[2][0]:
-                    self.phase_space[i,2] = 2*self.boundary[2][0] - self.phase_space[i,2]
-                    self.phase_space[i,5] *= -1
-                # z component of the particle is past the upper boundary
-                elif irow[2] > self.boundary[2][1]:
-                    self.phase_space[i,2] = 2*self.boundary[2][1] - self.phase_space[i,2]
-                    self.phase_space[i,5] *= -1
-
         # check for particle particle collisions
         for i, irow in enumerate(self.phase_space):
             row_idx = np.arange(self.phase_space.shape[0])
@@ -278,6 +246,51 @@ class EMsim:
                     d_mass = self.mass[i] - self.mass[j]
                     self.phase_space[i,3:] = (p1[3:] *(d_mass) + 2*self.mass[j]*p2[3:])/t_mass
                     self.phase_space[j,3:] = (p2[3:] *(-d_mass) + 2*self.mass[i]*p1[3:])/t_mass
+
+        # Only need to check for boundary collisions if a boundary is defined   
+        if self.boundary:
+            # Check which particles are past the boundary and flip the
+            # Corresponding velocity and move the particle back in the box
+            # The while loop is to help solve the case when velocities are very large.
+
+            # Number of boundary corrections
+            n_b_c = 1
+            while n_b_c > 0 :
+                n_b_c = 0
+                for i, irow in enumerate(self.phase_space):
+                    # x component of the particle is past the lower boundary
+                    if irow[0] < self.boundary[0][0]:
+                        # Move the particle back in the box
+                        self.phase_space[i,0] = 2*self.boundary[0][0] - self.phase_space[i,0]
+                        # Reflect the corresponding velocity
+                        self.phase_space[i,3] *= -1
+                        n_b_c +=1
+                    # x component of the particle is past the upper boundary
+                    elif irow[0] > self.boundary[0][1]:
+                        self.phase_space[i,0] = 2*self.boundary[0][1] - self.phase_space[i,0]
+                        self.phase_space[i,3] *= -1
+                        n_b_c +=1
+                    # y component of the particle is past the lower boundary
+                    if irow[1] < self.boundary[1][0]:
+                        self.phase_space[i,1] = 2*self.boundary[1][0] - self.phase_space[i,1]
+                        self.phase_space[i,4] *= -1
+                        n_b_c +=1
+                    # y component of the particle is past the upper boundary
+                    elif irow[1] > self.boundary[1][1]:
+                        self.phase_space[i,1] = 2*self.boundary[1][1] - self.phase_space[i,1]
+                        self.phase_space[i,4] *= -1
+                        n_b_c +=1
+                    # z component of the particle is past the lower boundary
+                    if irow[2] < self.boundary[2][0]:
+                        self.phase_space[i,2] = 2*self.boundary[2][0] - self.phase_space[i,2]
+                        self.phase_space[i,5] *= -1
+                        n_b_c +=1
+                    # z component of the particle is past the upper boundary
+                    elif irow[2] > self.boundary[2][1]:
+                        self.phase_space[i,2] = 2*self.boundary[2][1] - self.phase_space[i,2]
+                        self.phase_space[i,5] *= -1
+                        n_b_c +=1
+
 
 
 
